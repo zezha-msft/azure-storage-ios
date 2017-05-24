@@ -70,9 +70,9 @@
     BOOL useCurrentRunloop = !runloop;
     runloop = runloop ?: [NSRunLoop currentRunLoop];
     
-    // Upload
+    // step 1: upload the blob
     AZSByteValidationStream *uploadDelegate = [[AZSByteValidationStream alloc] initWithRandomSeed:randSeed totalBlobSize:blobSize isUpload:NO failBlock:^(NSString *message) {
-        XCTAssertTrue(NO, @"%@", message);
+        XCTFail(@"%@", message);
     }];
     AZSBlobRequestOptions *options = [[AZSBlobRequestOptions alloc] init];
     options.absorbConditionalErrorsOnRetry = YES;
@@ -82,9 +82,11 @@
     [blobOutputStream setDelegate:uploadDelegate];
     [blobOutputStream open];
     
+    // make the runloop iterate until either all the bytes are uploaded or an error is encountered
     BOOL loopSuccess = YES;
     while (loopSuccess && (!uploadDelegate.streamFailed) && (uploadDelegate.bytesWritten < blobSize)) {
         if (useCurrentRunloop) {
+            // run the loop once
             loopSuccess = [runloop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:2]];
         }
         else {
@@ -94,6 +96,7 @@
     
     [blobOutputStream close];
     
+    // continue the runloop until the stream is properly closed
     loopSuccess = YES;
     while (loopSuccess && blobOutputStream.streamStatus != NSStreamStatusClosed)
     {
@@ -106,9 +109,9 @@
     }
     [blobOutputStream removeFromRunLoop:runloop forMode:NSDefaultRunLoopMode];
     
-    // Download to Input Stream
+    // Step 2: download the blob to an Input Stream
     AZSByteValidationStream *downloadDelegate = [[AZSByteValidationStream alloc] initWithRandomSeed:randSeed totalBlobSize:blobSize isUpload:NO failBlock:^(NSString *message) {
-        XCTAssertTrue(NO, @"%@", message);
+        XCTFail(@"%@", message);
     }];
     
     options.runLoopForDownload = runloop;
@@ -131,9 +134,9 @@
     [readStream close];
     [readStream removeFromRunLoop:runloop forMode:NSDefaultRunLoopMode];
     
-    // Download to Output Stream
+    // Step 3: download to Output Stream and validate the blob content
     AZSByteValidationStream *downloadStream = [[AZSByteValidationStream alloc] initWithRandomSeed:randSeed totalBlobSize:blobSize isUpload:NO failBlock:^(NSString *message) {
-        XCTAssertTrue(NO, @"%@", message);
+        XCTFail(@"%@", message);
     }];
     
     AZSTestSemaphore *semaphore = [[AZSTestSemaphore alloc] init];
@@ -200,8 +203,8 @@
     }
 }
 
-// Note: This test works with ~200 MB blobs (you can watch memory consumption, it doesn't rise that far),
-// but it takes a while.
+// Note: This test works with ~20 MB blobs (you can watch memory consumption, it doesn't rise that far),
+// but it takes a while. TOASK should they be 200MB instead?
 -(void)testBlockBlobStreamIterate
 {
     int failures = 0;
@@ -225,7 +228,7 @@
     XCTAssertEqual(0, failures, @"%d failure(s) detected.", failures);
 }
 
-// Note: This test works with ~200 MB blobs (you can watch memory consumption, it doesn't rise that far),
+// Note: This test works with ~20 MB blobs (you can watch memory consumption, it doesn't rise that far),
 // but it takes a while.
 -(void)testPageBlobStreamCreateNewIterate
 {
@@ -251,7 +254,7 @@
     XCTAssertEqual(0, failures, @"%d failure(s) detected.", failures);
 }
 
-// Note: This test works with ~200 MB blobs (you can watch memory consumption, it doesn't rise that far),
+// Note: This test works with ~20 MB blobs (you can watch memory consumption, it doesn't rise that far),
 // but it takes a while.
 -(void)testPageBlobStreamExistingIterate
 {
@@ -286,7 +289,7 @@
 }
 
 
-// Note: This test works with ~200 MB blobs (you can watch memory consumption, it doesn't rise that far),
+// Note: This test works with ~20 MB blobs (you can watch memory consumption, it doesn't rise that far),
 // but it takes a while.
 -(void)testAppendBlobStreamCreateNewIterate
 {
@@ -311,7 +314,7 @@
     XCTAssertEqual(0, failures, @"%d failure(s) detected.", failures);
 }
 
-// Note: This test works with ~200 MB blobs (you can watch memory consumption, it doesn't rise that far),
+// Note: This test works with ~20 MB blobs (you can watch memory consumption, it doesn't rise that far),
 // but it takes a while.
 -(void)testAppendBlobStreamUseExistingIterate
 {
@@ -344,6 +347,7 @@
     XCTAssertEqual(0, failures, @"%d failure(s) detected.", failures);
 }
 
+// TOASK this is doing the same thing as runInternalTestStreamWithBlobSize, right?
 -(int)runTestUploadFromStreamWithBlobSize:(const NSUInteger)blobSize blobToUpload:(AZSCloudBlob *)blob uploadCall:(void (^)(NSInputStream * , AZSAccessCondition *, AZSBlobRequestOptions *, AZSOperationContext *, void(^)(NSError * error)))uploadCall
 {
     AZSTestSemaphore *semaphore = [[AZSTestSemaphore alloc] init];
@@ -351,7 +355,7 @@
     int __block testsFailedInDownload = 0;
     
     AZSByteValidationStream *sourceStream = [[AZSByteValidationStream alloc]initWithRandomSeed:randSeed totalBlobSize:blobSize isUpload:YES failBlock:^(NSString *message) {
-        XCTAssertTrue(NO, @"%@", message);
+        XCTFail(@"%@", message);
     }];
     AZSBlobRequestOptions *options = [[AZSBlobRequestOptions alloc] init];
     options.parallelismFactor = 2;
@@ -361,7 +365,7 @@
         XCTAssertNil(error, @"Error in uploading blob.  Error code = %ld, error domain = %@, error userinfo = %@", (long)error.code, error.domain, error.userInfo);
         
         AZSByteValidationStream *targetStream =[[AZSByteValidationStream alloc]initWithRandomSeed:randSeed totalBlobSize:blobSize isUpload:NO failBlock:^(NSString *message) {
-            XCTAssertTrue(NO, @"%@", message);
+            XCTFail(@"%@", message);
         }];
         
         AZSBlobInputStream *readStream = [blob createInputStream];
@@ -372,7 +376,7 @@
         
         wrapper.completionHandler = ^() {
             AZSByteValidationStream *newTargetStream = [[AZSByteValidationStream alloc] initWithRandomSeed:randSeed totalBlobSize:blobSize isUpload:NO failBlock:^(NSString *message) {
-                XCTAssertTrue(NO, @"%@", message);
+                XCTFail(@"%@", message);
             }];
             
             [blob downloadToStream:((NSOutputStream *)newTargetStream) accessCondition:nil requestOptions:options operationContext:nil completionHandler:^(NSError * error) {

@@ -115,6 +115,7 @@
             CC_MD5_Init(&_md5Context);
         }
         _streamingError = nil;
+        _createNew = NO;
         if (totalBlobSize)
         {
             _createNew = YES;
@@ -179,11 +180,7 @@
         return -1;
     }
     
-    if (!self.hasSpaceAvailable) {
-        return 0;
-    }
-    
-    if (self.closeCalled) {
+    if (!self.hasSpaceAvailable || self.closeCalled) {
         return 0;
     }
     
@@ -303,7 +300,7 @@
                 [blob appendBlockWithData:blockData contentMD5:nil accessCondition:self.accessCondition requestOptions:self.requestOptions operationContext:self.operationContext completionHandler:^(NSError * _Nullable error, NSNumber * _Nonnull appendOffset) {
                     if (error)
                     {
-                        // check for stuff
+                        // check for stuff TOASK clarification?
                         
                         if (self.requestOptions.absorbConditionalErrorsOnRetry && (error.userInfo[AZSCHttpStatusCode] == [NSNumber numberWithInt:412]) && ([error.userInfo[AZSCXmlCode] isEqualToString:@"AppendPositionConditionNotMet"] || [error.userInfo[AZSCXmlCode] isEqualToString:@"MaxBlobSizeConditionNotMet"]) && (self.operationContext.requestResults.count - currentResultsCount > 1))
                         {
@@ -378,7 +375,7 @@
         }
     }
     
-    // If there's an error, abort.
+    // If there's an error, abort. TOASK This needs to be checked again after the loop confirming that all blocks are updated exits.
     if (self.streamingError)
     {
         completionHandler(self.streamingError);
@@ -486,7 +483,8 @@
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)eventCode
 {
     NSInputStream *inputStream = (NSInputStream *)stream;
-    switch (eventCode) {
+    switch (eventCode)
+    {
         case NSStreamEventHasBytesAvailable:
         {
             // TODO: Stop reading if there was a error in uploading the blob?  Not sure if this is possible.

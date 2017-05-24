@@ -337,6 +337,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		953A1AC11ECA7AAF005C57E2 /* ServiceProperties */ = {
+			isa = PBXGroup;
+			children = (
+				57E472281DF73E7000B343AB /* AZSServiceProperties.m */,
+				57E4722A1DF7423A00B343AB /* AZSServiceProperties.h */,
+				57F37C011E1F09BB00FF130F /* AZSLoggingProperties.h */,
+				57F37C021E1F1D3400FF130F /* AZSMetricsProperties.h */,
+				57F37C031E1F290A00FF130F /* AZSLoggingProperties.m */,
+				57F37C051E1F292800FF130F /* AZSMetricsProperties.m */,
+				57F37C0A1E2022B900FF130F /* AZSCorsRule.h */,
+				57F37C0B1E2022D300FF130F /* AZSCorsRule.m */,
+			);
+			name = ServiceProperties;
+			sourceTree = "<group>";
+		};
 		B01AF6021AE0718F009A2022 /* Blob */ = {
 			isa = PBXGroup;
 			children = (
@@ -458,6 +473,7 @@
 		BE4510451A9D252300C3F971 /* AZSClient */ = {
 			isa = PBXGroup;
 			children = (
+				953A1AC11ECA7AAF005C57E2 /* ServiceProperties */,
 				BEC4476D1B751FBA00111ADA /* Constants */,
 				B07ED56E1AE713CA0012E8C1 /* Auth */,
 				B01AF6041AE08C50009A2022 /* Executor */,
@@ -503,14 +519,6 @@
 				BE90F9041B4EDF7300CD278B /* AZSUriQueryBuilder.m */,
 				BE4510461A9D252300C3F971 /* Supporting Files */,
 				B0432F5C1CE3B05D00FF4E5A /* AZSULLRange.h */,
-				57E472281DF73E7000B343AB /* AZSServiceProperties.m */,
-				57E4722A1DF7423A00B343AB /* AZSServiceProperties.h */,
-				57F37C011E1F09BB00FF130F /* AZSLoggingProperties.h */,
-				57F37C021E1F1D3400FF130F /* AZSMetricsProperties.h */,
-				57F37C031E1F290A00FF130F /* AZSLoggingProperties.m */,
-				57F37C051E1F292800FF130F /* AZSMetricsProperties.m */,
-				57F37C0A1E2022B900FF130F /* AZSCorsRule.h */,
-				57F37C0B1E2022D300FF130F /* AZSCorsRule.m */,
 			);
 			name = AZSClient;
 			path = "Azure Storage Client Library";

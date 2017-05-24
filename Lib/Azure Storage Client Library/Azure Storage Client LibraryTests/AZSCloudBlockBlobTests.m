@@ -709,7 +709,7 @@
             XCTAssertNil(error, @"Error in uploading block list.  Error code = %ld, error domain = %@, error userinfo = %@", (long)error.code, error.domain, error.userInfo);
         
             AZSByteValidationStream *targetStream = [[AZSByteValidationStream alloc]initWithRandomSeed:randSeed totalBlobSize:blockSize*blockCount isUpload:NO failBlock:^() {
-                XCTAssertTrue(NO, @"Incorrect number of bytes written to the stream.");
+                XCTFail(@"Incorrect number of bytes written to the stream.");
             }];
             AZSBlobRequestOptions *requestOptions = [[AZSBlobRequestOptions alloc] init];
             

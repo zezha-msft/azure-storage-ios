@@ -49,7 +49,8 @@ AZS_ASSUME_NONNULL_BEGIN
  */
 @property BOOL absorbConditionalErrorsOnRetry;
 
-// TODO: Implement logic to upload a blob as a single Put Blob call if below the below threshold.
+/** If the size in bytes is below this threshold, the blob would be uploaded as a single Put Blob call */
+// TOASK should there be an upper limit on this?
 @property NSUInteger singleBlobUploadThreshold;
 
 /** Initializes a new AZSBlobRequestOptions object.

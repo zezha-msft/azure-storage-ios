@@ -91,6 +91,7 @@
     }
 }
 
+/** This method creates a new thread and spins its runloop untill the semaphore.done becomes YES  */
 -(NSRunLoop *)runloopWithSemaphore:(AZSTestSemaphore *)semaphore
 {
     __block volatile NSRunLoop *runloop = nil;
