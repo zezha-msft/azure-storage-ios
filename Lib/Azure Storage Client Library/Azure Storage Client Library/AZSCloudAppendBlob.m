@@ -210,16 +210,24 @@
 {
     @autoreleasepool {
         NSRunLoop *runLoopForUpload = [NSRunLoop currentRunLoop];
-        BOOL __block blobFinished = NO;
+        __block BOOL blobFinished = NO;
+        __block NSError *error;
         
         // The blob will already exist in this case.
-        AZSBlobUploadHelper *blobUploadHelper = [[AZSBlobUploadHelper alloc] initToAppendBlob:inputContainer.targetBlob createNew:NO accessCondition:inputContainer.accessCondition requestOptions:inputContainer.blobRequestOptions operationContext:inputContainer.operationContext completionHandler:^(NSError * error) {
+        AZSBlobUploadHelper *blobUploadHelper = [[AZSBlobUploadHelper alloc] initToAppendBlob:inputContainer.targetBlob createNew:NO accessCondition:inputContainer.accessCondition requestOptions:inputContainer.blobRequestOptions operationContext:inputContainer.operationContext completionHandler:^(NSError * err) {
+            error = err;
+            blobFinished = YES;
             [inputContainer.sourceStream close];
             [inputContainer.sourceStream removeFromRunLoop:runLoopForUpload forMode:NSDefaultRunLoopMode];
-            blobFinished = YES;
             if (inputContainer.completionHandler)
             {
-                inputContainer.completionHandler(error);
+                // We want to do this on the global async queue because the current thread was created to perform the 'upload from
+                // stream' call only, and is not being managed.  This is needed to spin the runloop, but is not ideal for the resulting
+                // user callback.
+                dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void)
+                               {
+                                   inputContainer.completionHandler(error);
+                               });
             }
         }];
         

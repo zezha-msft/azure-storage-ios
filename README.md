@@ -134,12 +134,6 @@ Also coming soon: API docs, a getting-started guide, and a downloadable framewor
 - Use Shared Key authentication or SAS authentication.
 - Access conditions, automatic retries and retry policies, and logging.
 
-### Missing functionality
-
-The following functionality is all coming soon:
-- If you want to download a blob's contents to a stream, this is possible using the DownloadToStream method on AZSCloudBlob.  However, it is not yet possible to open an input stream that reads directly from the blob.
-- There are a number of internal details that will change in the upcoming releases.  If you look at the internals of the library (or fork it), be prepared.  Much of this will be clean-up related.
-
 ### Specific areas we would like feedback on:
 
 - NSOperation support.  We have had requests to use NSOperation as the primary method of using the library - methods such as 'UploadFromText' would return an NSOperation, that could then be scheduled in an operation queue.  However, this approach seems to have several drawbacks, notably along the lines of error handling and data return.  (For example, imagine trying to implement a 'CreateIfNotExists' method, using 'Exists' and 'Create'.  If they both returned an NSOperation, you could have the 'Create' operation depend on the 'Exists' operation, but the 'Create' operation would need to behave differently in the case that 'Exists' returns an error, or that the resource already exists.)  If you have suggestions, please discuss in the wiki, or open an issue.
