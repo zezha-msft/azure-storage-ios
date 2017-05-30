@@ -5,7 +5,7 @@ Azure Storage Client Library for iOS
 This library is designed to help you build iOS applications that use Microsoft Azure Storage.
 At the moment, the library is in a preview stage, so thank you for taking a look!  It will be some time before the library is stable.  In the meantime, we would like to get as much input as possible from the community.  Please let us know of any issues you encounter by opening an issue on Github.
 
-The library currently supports almost all blob operations (some exceptions noted below.)  Other services (table, queue, file) are forthcoming, depending on demand.
+The library currently supports almost all blob operations (some exceptions noted below.)  Other services (table, queue, file) are forthcoming, depending on demand. The reference documentation is located [here](http://azure.github.io/azure-storage-ios/).
 
 To use this library, you need the following:
 - iOS 8+
@@ -144,6 +144,24 @@ The following functionality is all coming soon:
 
 - NSOperation support.  We have had requests to use NSOperation as the primary method of using the library - methods such as 'UploadFromText' would return an NSOperation, that could then be scheduled in an operation queue.  However, this approach seems to have several drawbacks, notably along the lines of error handling and data return.  (For example, imagine trying to implement a 'CreateIfNotExists' method, using 'Exists' and 'Create'.  If they both returned an NSOperation, you could have the 'Create' operation depend on the 'Exists' operation, but the 'Create' operation would need to behave differently in the case that 'Exists' returns an error, or that the resource already exists.)  If you have suggestions, please discuss in the wiki, or open an issue.
 - The Azure Storage client currently uses NSURLSession behind the scenes to perform the HTTP requests.  Currently, the client does not expose the delegate queue or various session configuration options to users, other than what will be exposed in the RequestOptions object.  Is this something you would like to have control over?
+
+### Error handling
+
+All the errors thrown by the library are under the domain `AZSErrorDomain` = `@"com.Microsoft.AzureStorage.ErrorDomain"`.
+
+| Error code                | Int Value | Meaning
+| ------------------------- | --------- | ------------
+| AZSEInvalidArgument       | 1         | The input argument was not valid. Consult `NSLocalizedDescriptionKey` on `userInfo` for details.
+| AZSEURLSessionClientError | 2         | The error was thrown by the URLSession Client, consult `AZSInnerErrorString` on `userInfo` for details.
+| AZSEServerError           | 3         | An error was received from the server. Consult `userInfo`, especially `AZSCHttpStatusCode`, for details.
+| AZSEMD5Mismatch           | 4         | There is a MD5 mismatch when verifying the downloaded content.
+| AZSEClientTimeout         | 5         | The client aborted the request because it took longer than the allotted time.
+| AZSEParseError            | 6         | Parsing of the response was unsuccessful, please retry.
+| AZSEXMLCreationError      | 7         | Unable to create the XML for the ontgoing request. This should almost never happen, unless you run out of memory.
+| AZSEOutputStreamError     | 8         | Unexpected error in writing to output stream, retry might help.
+| AZSEOutputStreamFull      | 9         | OutputStream is full but there is more pending data, aborting download.
+
+Although error handling is opt-in in Objective-C, we recommend that you pass a `NSError` pointer to the methods that take it, and log all errors whenever possible.
 
 ### Logging
 If you are having problems with the library, turning on logging may help.  Some notes:

@@ -238,7 +238,7 @@
     if (writer == NULL)
     {
         *error = [NSError errorWithDomain:AZSErrorDomain code:AZSEXMLCreationError userInfo:nil];
-        [operationContext logAtLevel:AZSLogLevelError withMessage:@"Error in generating service propertes XML."];
+        [operationContext logAtLevel:AZSLogLevelError withMessage:@"Error in generating service properties XML."];
         xmlBufferFree(buffer);
         return nil;
     }
